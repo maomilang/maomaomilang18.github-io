@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第18屆風險管理基本能力測驗</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans TC', sans-serif; background: #f0f4f8; color: #2d3748; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%); color: white; padding: 20px 24px; text-align: center; }
+.header h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+.header p { font-size: 0.85rem; opacity: 0.85; }
+.progress-bar-wrap { background: rgba(255,255,255,0.2); border-radius: 8px; height: 8px; margin-top: 12px; }
+.progress-bar { background: #68d391; height: 8px; border-radius: 8px; transition: width 0.4s; }
+.stats-row { display: flex; justify-content: center; gap: 16px; padding: 12px 16px; background: white; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+.stat { text-align: center; }
+.stat-val { font-size: 1.3rem; font-weight: 700; }
+.stat-lbl { font-size: 0.7rem; color: #718096; }
+.correct-val { color: #38a169; }
+.wrong-val { color: #e53e3e; }
+.score-val { color: #2b6cb0; }
+.remain-val { color: #805ad5; }
+.main { max-width: 760px; margin: 0 auto; padding: 20px 16px; }
+.question-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 16px; }
+.q-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.q-num { font-size: 0.8rem; font-weight: 600; color: #718096; }
+.q-pts { font-size: 0.8rem; background: #ebf8ff; color: #2b6cb0; padding: 2px 8px; border-radius: 12px; }
+.q-text { font-size: 1rem; line-height: 1.7; font-weight: 500; }
+.options { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+.option-btn { border: 2px solid #e2e8f0; background: white; border-radius: 8px; padding: 12px 16px; text-align: left; cursor: pointer; font-size: 0.95rem; line-height: 1.5; transition: all 0.2s; display: flex; align-items: flex-start; gap: 10px; width: 100%; }
+.option-btn:hover:not(:disabled) { border-color: #2b6cb0; background: #ebf8ff; }
+.opt-label { min-width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; color: #4a5568; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.option-btn.correct { border-color: #38a169; background: #f0fff4; }
+.option-btn.correct .opt-label { background: #38a169; color: white; }
+.option-btn.wrong { border-color: #e53e3e; background: #fff5f5; }
+.option-btn.wrong .opt-label { background: #e53e3e; color: white; }
+.option-btn:disabled { cursor: default; }
+.feedback { margin-top: 14px; padding: 12px 16px; border-radius: 8px; font-size: 0.9rem; display: none; }
+.feedback.show { display: block; }
+.feedback.correct { background: #f0fff4; color: #276749; border-left: 4px solid #38a169; }
+.feedback.wrong { background: #fff5f5; color: #9b2c2c; border-left: 4px solid #e53e3e; }
+.nav-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+.btn { padding: 10px 22px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: all 0.2s; }
+.btn-primary { background: #2b6cb0; color: white; }
+.btn-primary:hover { background: #2c5282; }
+.btn-secondary { background: #e2e8f0; color: #4a5568; }
+.btn-secondary:hover { background: #cbd5e0; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.result-screen { background: white; border-radius: 12px; padding: 40px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; display: none; }
+.result-screen.show { display: block; }
+.result-circle { width: 140px; height: 140px; border-radius: 50%; margin: 0 auto 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; }
+.result-circle.pass { background: #f0fff4; border: 6px solid #38a169; color: #276749; }
+.result-circle.fail { background: #fff5f5; border: 6px solid #e53e3e; color: #9b2c2c; }
+.result-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+.result-sub { color: #718096; margin-bottom: 24px; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; max-width: 320px; margin-left: auto; margin-right: auto; }
+.result-item { background: #f7fafc; border-radius: 8px; padding: 14px; }
+.result-item-val { font-size: 1.4rem; font-weight: 700; }
+.result-item-lbl { font-size: 0.75rem; color: #718096; margin-top: 2px; }
+.start-screen { background: white; border-radius: 12px; padding: 40px 24px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-align: center; }
+.start-icon { font-size: 3rem; margin-bottom: 16px; }
+.start-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+.start-info { color: #718096; margin-bottom: 24px; line-height: 1.6; font-size: 0.9rem; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; max-width: 340px; margin: 0 auto 28px; }
+.info-item { background: #f7fafc; border-radius: 8px; padding: 12px; font-size: 0.85rem; }
+.info-item strong { display: block; font-size: 1.1rem; color: #2b6cb0; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>🏦 第18屆風險管理基本能力測驗</h1>
+  <p>科目：風險管理制度與實務</p>
+  <div class="progress-bar-wrap" id="progressWrap" style="display:none">
+    <div class="progress-bar" id="progressBar" style="width:0%"></div>
+  </div>
+</div>
+<div class="stats-row" id="statsRow" style="display:none">
+  <div class="stat"><div class="stat-val remain-val" id="statRemain">60</div><div class="stat-lbl">剩餘題數</div></div>
+  <div class="stat"><div class="stat-val correct-val" id="statCorrect">0</div><div class="stat-lbl">答對</div></div>
+  <div class="stat"><div class="stat-val wrong-val" id="statWrong">0</div><div class="stat-lbl">答錯</div></div>
+  <div class="stat"><div class="stat-val score-val" id="statScore">0.0</div><div class="stat-lbl">目前得分</div></div>
+</div>
+<div class="main">
+  <div class="start-screen" id="startScreen">
+    <div class="start-icon">📊</div>
+    <div class="start-title">準備好開始測驗了嗎？</div>
+    <div class="start-info">台灣金融研訓院第18屆風險管理基本能力測驗<br>共60題，題目與選項順序均隨機排列</div>
+    <div class="info-grid">
+      <div class="info-item"><strong>60題</strong>總題數</div>
+      <div class="info-item"><strong>100分</strong>滿分</div>
+      <div class="info-item"><strong>1-40題</strong>每題1.5分</div>
+      <div class="info-item"><strong>41-60題</strong>每題2分</div>
+    </div>
+    <button class="btn btn-primary" onclick="startQuiz()" style="font-size:1rem;padding:12px 40px;">開始測驗</button>
+  </div>
+  <div id="quizScreen" style="display:none">
+    <div class="question-card">
+      <div class="q-meta">
+        <span class="q-num" id="qNum"></span>
+        <span class="q-pts" id="qPts"></span>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="options"></div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-secondary" id="btnPrev" onclick="prevQ()" disabled>← 上一題</button>
+      <button class="btn btn-primary" id="btnNext" onclick="nextQ()" disabled>下一題 →</button>
+    </div>
+  </div>
+  <div class="result-screen" id="resultScreen">
+    <div class="result-circle" id="resultCircle"></div>
+    <div class="result-title" id="resultTitle"></div>
+    <div class="result-sub" id="resultSub"></div>
+    <div class="result-grid">
+      <div class="result-item"><div class="result-item-val correct-val" id="rCorrect"></div><div class="result-item-lbl">答對題數</div></div>
+      <div class="result-item"><div class="result-item-val wrong-val" id="rWrong"></div><div class="result-item-lbl">答錯題數</div></div>
+      <div class="result-item"><div class="result-item-val" id="rPart1"></div><div class="result-item-lbl">第一部分得分</div></div>
+      <div class="result-item"><div class="result-item-val" id="rPart2"></div><div class="result-item-lbl">第二部分得分</div></div>
+    </div>
+    <button class="btn btn-primary" onclick="restartQuiz()" style="font-size:1rem;padding:12px 36px;">🔄 重新測驗</button>
+  </div>
+</div>
+<script>
+const QUESTIONS=[{id:1,pts:1.5,part:1,text:"銀行根據風險胃納、策略及管理所需建立之損失機率範圍，藉由內部風險管理部門，計算「非預期損失」的資本需求額，名稱為下列何者？",options:["法定資本","經濟資本","已投入資本","緩衝資本"],answer:1},{id:2,pts:1.5,part:1,text:"下列何者是合理的風險管理觀念？",options:["不宜使用相同風險標準看待所有員工，但部屬的責任要大於主管","組織的前台與中台部門均要面對風險挑戰，只有後台部門不用","風險管理的決策，「從上而下」比「由下往上」的重要","風險產生單位與監督單位不宜相互隸屬，使用的風險管理指標和標準也宜儘量不同"],answer:3},{id:3,pts:1.5,part:1,text:"關於成本中心，下列敘述何者錯誤？",options:["成本中心的主管僅能控制成本或費用","成本中心以追求產品或服務成本最低為努力目標","成本中心主管無權參與選擇各項投入資源的標準及來源","適用成本中心的單位，「無權決定」產量或服務多寡，以及產量或服務售價"],answer:2},{id:4,pts:1.5,part:1,text:"利潤中心制度最好使用下列何者當作績效衡量指標？",options:["營業利益","邊際貢獻","可控制利益","淨利(Net Income)"],answer:2},{id:5,pts:1.5,part:1,text:"關於營運利潤、財務利潤與會計利潤之關係，下列敘述何者錯誤？",options:["會計利潤為營運利潤與財務利潤相加","財務利潤為內部移轉價格與市場價格的差額","營運利潤為顧客價格與內部移轉價格的差額","會計利潤為內部損益與外部損益的合計，將不同營業單位的內部損益相抵銷，合計數通常不為零"],answer:3},{id:6,pts:1.5,part:1,text:"銀行業要成功推動作業基礎成本制(Activity-Based Costing, ABC)，下列何者因素最重要？",options:["企業社會責任","遵循會計公報規定","主管機關要求","作業標準化"],answer:3},{id:7,pts:1.5,part:1,text:"傑克在 1 歐元兌換 1.25 美元時，購買德國債券 1,000 歐元，持有至市價 884 歐元、匯率為 1 歐元兌換 1.5385 美元時賣出，在不考慮其他收益下，請問此投資者的損益為何？",options:["損失 116 美元","獲利 360 美元","獲利 110 美元","損失 178 美元"],answer:2},{id:8,pts:1.5,part:1,text:"有關銀行的風險管理，下列敘述何者錯誤？",options:["表外業務須揭露於資產負債表的附註","資產負債的到期期限相等，銀行即不存在利率風險","透過內部模型推估的風險值，須進行回溯測試","銀行應採取多軌制 FTP 系統，以降低財務風險、反映資金成本"],answer:1},{id:9,pts:1.5,part:1,text:"依銀行公會的評分標準，下列四種公司組織型態，由高至低的信用得分依序為何？ A.股份有限公司、B.股票公開發行公司、C.股票上市公司、D.股票上櫃與興櫃公司",options:["ABCD","BCDA","CDAB","CDBA"],answer:3},{id:10,pts:1.5,part:1,text:"銀行接受廠商委託，向國外商品勞務的賣方簽定「即期跟單匯票」，於完成信用狀約定下，先行墊付款項。然後，通知借款人在合理期限內「備款贖單」之票據融通方式，稱為哪種業務？",options:["墊付國內票款","墊付出口票款","出口押匯","進口押匯"],answer:3},{id:11,pts:1.5,part:1,text:"A 公司全年的營業收入為新臺幣（以下同）1.2 億元，其中內銷占九成，其應收款項（含應收票據）週轉次數 2 次，該公司在其他行庫辦理票據融資額度為 3,000 萬元，假定 A 公司預期未來一年營業及收款條件無明顯變化，銀行墊付成數最高為八成，則 A 公司可獲核定之客票融資額度以不超過多少金額為宜？",options:["1,320 萬元","1,800 萬元","2,500 萬元","3,000 萬元"],answer:0},{id:12,pts:1.5,part:1,text:"常見的中長期融資不包含下列何者？",options:["自創品牌放款","企業天然災害復建放款","民間投資興辦公共設施放款","墊付出口票款"],answer:3},{id:13,pts:1.5,part:1,text:"有關信用卡收單機構的收單業務，下列敘述何者正確？",options:["製作新卡、掛失補發與換發到期新卡","辦理持卡人逾期帳款的催繳","代理收付在特約商店簽卡消費的帳款","招募發卡機構成為會員，提供授權與清算之網路服務"],answer:2},{id:14,pts:1.5,part:1,text:"根據國際信用評等機構 Standard & Poor's 的信用等級分類，下列何者信用等級最佳？",options:["AAA","AA+","A+","BBB"],answer:0},{id:15,pts:1.5,part:1,text:"借款客戶與所有往來銀行的融資額度與未還清餘額、有否退票、逾期及呆帳等不良紀錄，可在下列何機構取得資訊？",options:["聯合信用卡處理中心","金融聯合徵信中心","財金資訊股份有限公司","臺灣票據交換所"],answer:1},{id:16,pts:1.5,part:1,text:"有關授信對象的風險限額之敘述，下列何者錯誤？",options:["承作授信額度的上限稱為風險限額","個別戶的所有案件仍受總風險限額規範","風險限額又稱風險權限","傳統方法訂定的放款額度，衡量風險限額時，能快速反映違約風險，實務上優於「信用風險值」的計算"],answer:3},{id:17,pts:1.5,part:1,text:"為避免承擔過高的信用風險，銀行經由違約機率、信用暴險額與違約損失率建立的評等模型，計算的風險限額，稱為下列何者？",options:["信用風險值","授信總餘額","融資額度","潛在暴險額"],answer:0},{id:18,pts:1.5,part:1,text:"銀行公會制定之「授信企業信用評等表」，藉由三個構面評分，其中哪兩個構面隨著大型企業與中小型企業差異，將信用評分的比重設定不同？",options:["財務狀況、經營管理","經營管理、產業特性暨展望","財務狀況、產業特性暨展望","獲利情形、經營管理"],answer:0},{id:19,pts:1.5,part:1,text:"銀行授信主管考量借戶有否警示性財務比率、重複計算定性指標的分數、黑名單等資訊，而調整信用等級，實務上稱為何種評等？",options:["基本模型的評等","授信戶的個別評等","授信特徵評等","財務評等"],answer:1},{id:20,pts:1.5,part:1,text:"國家風險的演進，大致分為三個階段涵蓋三種風險概念，下列哪項內容不符合此風險概念？",options:["匯率風險","國家風險","外匯移轉風險","主權風險"],answer:0},{id:21,pts:1.5,part:1,text:"常理上，銀行的「跨國授信」，不包括下列何種風險？",options:["利率風險","匯率風險","信用風險","財務風險"],answer:3},{id:22,pts:1.5,part:1,text:"台灣的票券金融公司在資本適足率未達多少時，不得設立分公司？",options:["未達 6%","未達 8%","未達 10%","未達 12%"],answer:1},{id:23,pts:1.5,part:1,text:"A 銀行在 112 年 12 月底之信用風險加權風險性資產為新臺幣（以下同）1,000 億元，市場風險和作業風險應計提資本各為 5 億元，請問三種風險合計的加權風險性資產為下列何者？",options:["1,000 億元","1,005 億元","1,010 億元","1,125 億元"],answer:3},{id:24,pts:1.5,part:1,text:"依據銀行資本適足性及資本等級管理辦法，本國銀行之普通股權益比率，自 108 年起不得低於多少？",options:["6.375%","7.00%","8.50%","10.50%"],answer:1},{id:25,pts:1.5,part:1,text:"依銀行法第 74 條規定，銀行得投資「金融相關事業」及「非金融相關事業」，下列何者錯誤？",options:["投資總額不得超過投資時銀行淨值之百分之四十","投資非金融相關事業之總額，不得超過投資時淨值之百分之十","投資金融相關事業，其屬同一業別者，除配合政府政策，經主管機關核准者外，以一家為限","投資非金融相關事業，對每一事業之投資金額不得超過該被投資事業實收資本總額或已發行股份總數之百分之三"],answer:3},{id:26,pts:1.5,part:1,text:"有關保險公司的資本適足率與業務限制，下列敘述何者錯誤？",options:["人身保險業之資本適足率達 200%以上者，可申請辦理外幣收付之非投資型人身保險業務","最近一年的資本適足率達 200%以上時，得申請設立國外子公司或分公司","保險公司的資本適足率達 300%以上時，得申請從事增加投資效益之衍生性金融商品交易","財務和業務健全的財產保險公司，最近一年之資本適足率達 200%時，可申請「傷害保險」及「健康保險」"],answer:2},{id:27,pts:1.5,part:1,text:"證券商的資本適足率高於 100%，但低於 120%，應提列節餘數多少比率當作特別盈餘公積？",options:["10%","20%","30%","40%"],answer:3},{id:28,pts:1.5,part:1,text:"信用風險的「內部評等法」，依據授信對象的「信用等級」，決定「風險權數」；目前國內銀行常用的信用等級資訊來源，下列敘述何者錯誤？",options:["公開資訊觀測站資訊","信用評等機構的信用資訊","銀行自行建立的信用評分模型","金融聯合徵信中心(JCIC)提供的「信用資料庫」"],answer:0},{id:29,pts:1.5,part:1,text:"已知借款客戶的帳面價值為 100 億元，總資產的市場價值為 60 億元，總負債的市場價值為 75 億元，請問銀行產生的違約類型如何？",options:["會產生經濟違約","會產生技術性違約","會產生流動性違約","不會有任何影響"],answer:0},{id:30,pts:1.5,part:1,text:"銀行除授信資產提列損失準備外，扣除對政府機關之債權，其餘債權衍生的「非授信資產」，依照損失程度將損失準備率分成五類，有關損失準備率之敘述，下列何者錯誤？",options:["第一類為 1%","第二類為 2%","第三類為 10%","第四類為 50%"],answer:0},{id:31,pts:1.5,part:1,text:"某銀行承作兩筆衍生性金融交易，其一為名目本金$200,000，期別 5 年的利率交換契約，計算權數為 0.005，當期暴險額為 5,000 元，另一筆為名目本金$100,000，期別 3 年的外匯交換契約，計算權數為 0.05，當期暴險額為 3,000 元，請問該銀行的潛在暴險額為何？",options:["3,000 元","6,000 元","7,000 元","14,000 元"],answer:1},{id:32,pts:1.5,part:1,text:"A 銀行買入國庫券新臺幣 10 億元，根據「標準法」的風險權數設計，該筆國庫券之信用風險性資產為何？",options:["0","2 億元","5 億元","10 億元"],answer:0},{id:33,pts:1.5,part:1,text:"假設常態情況的容忍水準為 1%，殖利率之標準差為 0.5%，敏感性係數β為 0.5，下列敘述何者正確？",options:["VaR=0-2.325×1×0.005","VaR=0-2.325×1×0.01","VaR=0-2.325×0.5×0.01","VaR=0-2.325×0.5×0.005"],answer:3},{id:34,pts:1.5,part:1,text:"市場風險係指資產負債表之表內及表外部位，隨著市場價格的變動，而出現已實現和未實現的損失，這裡所指的市場價格不包含下列何者？",options:["利率","匯率","加密貨幣","商品價格"],answer:2},{id:35,pts:1.5,part:1,text:"針對金融商品部位之價格風險，有關市場風險的敘述，下列何者正確？",options:["假設債券之利率敏感係數為 5，利率若變動 0.01%，債券價格將變動 0.05%","債券之敏感性因子主要是指利率，也就是債券之票面利率","「PVBP」係指利率變動 1%，債券價格將變動多少數額","假設 10,000 元債券的敏感性係數為 5，殖利率上升 0.01%時，債券價格將上升 5 元，成為 10,005 元"],answer:0},{id:36,pts:1.5,part:1,text:"負責流動性管理政策與策略的功能性委員會，在銀行內部是下列何種委員會？",options:["薪酬管理委員會","投資審議委員會","授信審查委員會","資產負債管理委員會"],answer:3},{id:37,pts:1.5,part:1,text:"下列何者不屬於「存款準備」部位的項目？",options:["庫存現金","存款負債","存款準備金帳戶餘額","跨行業務清算基金專戶的存款"],answer:1},{id:38,pts:1.5,part:1,text:"有關作業風險之資本計提，標準法是依業務別設定計提指標，並與對應且權數固定的β值相乘求得資本計提額，下列敘述何者錯誤？",options:["將銀行業務活動分為八大類別","八類業務均以「營業毛利」作為計提標準","八類業務均以「營業利益」作為計提標準","風險係數β值，依業務屬性與暴險程度，定在 12%至 18%之間"],answer:2},{id:39,pts:1.5,part:1,text:"為使銀行維持適足資本，金管會公告之銀行資本適足性及資本等級管理辦法，是依下列何者法規訂定？",options:["證券交易法","銀行法","洗錢防制法","公司法"],answer:1},{id:40,pts:1.5,part:1,text:"「資本適足比率」的分子分母項目，為下列何者？",options:["負債與風險性資產之比率","固定資產與風險性資產之比率","自有資本與固定資產之比率","自有資本與風險性資產之比率"],answer:3},{id:41,pts:2,part:2,text:"有關資產負債管理委員會之權責，下列敘述何者錯誤？",options:["審核全行作業風險的緊急應變計畫","審核流動性管理指標的門檻標準","審核利率風險之避險策略","審核金融同業的拆款額度"],answer:0},{id:42,pts:2,part:2,text:"銀行的董事會將授信管理處定義為利潤中心時，其權責宜包括下列哪些？ A.信用風險的監督管理 B.承擔授信績效的使命 C.監控資本適足率的任務 D.訂定風險胃納制度",options:["僅 A","僅 AB","僅 ABC","ABCD"],answer:1},{id:43,pts:2,part:2,text:"銀行的營業單位遇到資金剩餘時，透過聯行往來供應資金給予總行財務處統一運用，適用的利率係指下列何者？",options:["供應利率","借用利率","補貼利率","懲罰利率"],answer:0},{id:44,pts:2,part:2,text:"經濟移轉價格通常考量下列哪些因子？ A.作業成本、B.與資金來源有關的借款成本、C.與流動性風險有關的流動性貼水、D.與信用風險有關的呆帳準備",options:["僅 B","僅 A、B","僅 B、C、D","A、B、C、D"],answer:2},{id:45,pts:2,part:2,text:"有關資金移轉制度的敘述，下列何者錯誤？",options:["銀行資金呈現浮濫時，宜透過調低供應利率，減少營業單位吸收定期性存款","銀行若要加強推動授信業務，可透過調高供應利率來間接達成","多種借用利率與供應利率構成的 FTP 制度，稱為「多軌制」的聯行往來","銀行的內部資金轉撥價格，又稱聯行往來利率"],answer:1},{id:46,pts:2,part:2,text:"基於規避匯率風險，銀行最好保持每種幣別的資產與負債相同。所謂資產與負債相同，不包括下列何者？",options:["金額大小力求相近","到期日結構力求相近","匯率與利率走勢力求相近","平均期限(Duration)力求相近"],answer:2},{id:47,pts:2,part:2,text:"甲公司的平均應收帳款為 1,200 萬元，平均總資產為 2 億元，總資產週轉率為 0.56 次，請問甲公司的應收帳款週轉率為何？",options:["8.5 次","9.3 次","10.6 次","11.2 次"],answer:1},{id:48,pts:2,part:2,text:"有關房貸業務的保證人規範，下列敘述何者正確？",options:["銀行可要求自用住宅放款及消費性放款的借款人提供連帶保證人","銀行取得足額擔保時，不得要求借款人提供保證人","銀行無擔保授信而徵取的保證人，其保證金額無上限","銀行求償時應同時向借款人與保證人求償，以利債權回收"],answer:1},{id:49,pts:2,part:2,text:"某甲的月收入平均 6 萬元，目前的無擔保債務僅有向乙銀行申辦信用卡，刷卡使用尚有的循環信用餘額 80 萬元。某甲打算再向丙銀行申辦信用貸款，依主管機關規定，請問某甲最高可貸多少金額？",options:["32 萬元","42 萬元","52 萬元","62 萬元"],answer:2},{id:50,pts:2,part:2,text:"下列何項內容符合國際信評機構目前的評等慣例？",options:["國家風險的評估，不需考慮社會和諧程度","績效卓越公司發行的債券等級，可能優於國家風險等級","績效卓越公司發行的股票等級，須低於國家風險等級","國際信評機構不發布國家風險等級"],answer:1},{id:51,pts:2,part:2,text:"銀行在信用風險集中度的授信架構，將授信對象分成哪三種層面控管總風險限額？",options:["自然人、法人與集團企業","大型企業、中型企業與小型企業","優等客戶、一般客戶與高風險客戶","客戶、產業與國家別分類"],answer:3},{id:52,pts:2,part:2,text:"國家主權評等的預告機制，下列敘述何者不適當？",options:["「展望」動態著眼於未來一至二年的信用走向","「觀察名單」關心被觀察國家未來三個月的信用等級變化","「觀察名單」的變化，分成正向、負向與穩定","「展望」的變化，分成正向、負向與穩定"],answer:2},{id:53,pts:2,part:2,text:"銀行投資「金融相關事業」時，資本計提採國際作法，其中「重大投資者」係指在被投資公司持有表決權股份總數或資本總額______；銀行普通股權益比率為 7%時______，以上空格應分別填入下列何者？",options:["百分之八；不得申設國外分支機構","百分之八；可申設國外分支機構","百分之十；不得申設國外分支機構","百分之十；可申設國外分支機構"],answer:3},{id:54,pts:2,part:2,text:"有關金控集團合格資本淨額各項扣除數，下列扣除對象的敘述，何者正確？ A.依創業投資公司之方法計算者，該子公司之「資本溢額」 B.依保險公司計算自有資本之子公司來自資本性質債券之資本溢額，補充其他保險業資本缺額後之數額的三分之一 C.已自集團合格資本總額中扣除之投資帳列金額，不再計入集團法定資本需求",options:["僅 AB","僅 AC","僅 BC","ABC"],answer:1},{id:55,pts:2,part:2,text:"有關信用風險之表外業務暴險部位，下列何者錯誤？",options:["表外業務之暴險，主要來自於集中市場","表外業務的暴險部位，可能同時存在信用風險與市場風險","從事衍生性業務時，銀行可能因客戶信用惡化而承受暴險","衍生性部位之每日清算價值(Mark-to-Market)為正，會使銀行所承擔之信用風險升高"],answer:0},{id:56,pts:2,part:2,text:"商業銀行的業務種類中，信用風險可以區分為表內業務的風險及表外業務的風險，下列何者屬於表外業務的風險？ A.承作「非衍生性業務」的「放款承諾」 B.房屋貸款 C.學生貸款 D.開立擔保信用狀 E.提供商業本票的貼現",options:["僅 BC","僅 ABC","僅 AD","ABCDE"],answer:2},{id:57,pts:2,part:2,text:"資本適足率為 10.5%的大直銀行，使用內部評等法，對 AAA 級授信客戶，設定 14%風險權數，低於標準法使用的 20%，若該銀行承作此客戶 10 億元「無擔保授信」，請問兩種方法計算的資本計提額相差多少？",options:["0.6 億元","0.063 億元","0.112 億元","0.128 億元"],answer:1},{id:58,pts:2,part:2,text:"與市場風險有關之主要部位，計算變動幅度時，具體涵義係指利率、匯率或石油價格等市場因素變動「一單位」時，觀察目標部位或金融商品的價格，變動多少幅度，針對風險指標的名稱，下列何者錯誤？",options:["風險係數","波動幅度","向下風險","敏感性係數"],answer:0},{id:59,pts:2,part:2,text:"銀行若能正確預測未來的利率水準，當市場利率由低往高攀升時，應採取之資金策略為何？ A.應採用「正缺口部位」管理資金 B.應採用「負缺口部位」管理資金 C.最好增加持有「敏感性資產」和「非敏感性負債」 D.最好減少持有「敏感性資產」和「非敏感性負債」",options:["僅 AC","僅 AD","僅 BC","僅 BD"],answer:0},{id:60,pts:2,part:2,text:"下列何者不是計提作業風險資本需求額的方法？",options:["標準法","風險值法","進階衡量法","基本指標法"],answer:1}];
+
+const LABELS=['(1)','(2)','(3)','(4)'];
+let shuffledQs=[],shuffledOpts=[],current=0,userAnswers=[],answered=[],correctCount=0,wrongCount=0,part1Score=0,part2Score=0;
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function startQuiz(){
+  shuffledQs=shuffle([...Array(60).keys()]).map(i=>QUESTIONS[i]);
+  shuffledOpts=shuffledQs.map(()=>shuffle([0,1,2,3]));
+  userAnswers=new Array(60).fill(null);
+  answered=new Array(60).fill(false);
+  current=0;correctCount=0;wrongCount=0;part1Score=0;part2Score=0;
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('quizScreen').style.display='block';
+  document.getElementById('progressWrap').style.display='block';
+  document.getElementById('statsRow').style.display='flex';
+  updateStats();renderQuestion();
+}
+
+function renderQuestion(){
+  const q=shuffledQs[current];const optOrder=shuffledOpts[current];
+  document.getElementById('qNum').textContent=`第 ${current+1} / 60 題（原題 ${q.id} 題）`;
+  document.getElementById('qPts').textContent=`每題 ${q.pts} 分`;
+  document.getElementById('qText').textContent=q.text;
+  const oc=document.getElementById('options');oc.innerHTML='';
+  optOrder.forEach((origIdx,displayIdx)=>{
+    const btn=document.createElement('button');
+    btn.className='option-btn';btn.disabled=answered[current];
+    const label=document.createElement('span');label.className='opt-label';label.textContent=LABELS[displayIdx];
+    const text=document.createElement('span');text.textContent=q.options[origIdx];
+    btn.appendChild(label);btn.appendChild(text);
+    if(answered[current]){
+      const cd=optOrder.indexOf(q.answer);
+      if(displayIdx===cd)btn.classList.add('correct');
+      else if(userAnswers[current]===displayIdx)btn.classList.add('wrong');
+    } else {
+      btn.onclick=()=>selectAnswer(displayIdx);
+    }
+    oc.appendChild(btn);
+  });
+  const fb=document.getElementById('feedback');
+  if(answered[current]){
+    const cd=optOrder.indexOf(q.answer);
+    const ok=userAnswers[current]===cd;
+    fb.className='feedback show '+(ok?'correct':'wrong');
+    fb.textContent=ok?'✅ 答對了！':`❌ 答錯了！正確答案為 ${LABELS[cd]} ${q.options[q.answer]}`;
+  } else {fb.className='feedback';}
+  document.getElementById('btnPrev').disabled=current===0;
+  const bn=document.getElementById('btnNext');
+  if(current===59){bn.textContent=answered[current]?'查看結果 🏁':'下一題 →';bn.onclick=answered[current]?showResult:nextQ;}
+  else{bn.textContent='下一題 →';bn.onclick=nextQ;}
+  bn.disabled=!answered[current];
+  document.getElementById('progressBar').style.width=(answered.filter(Boolean).length/60*100)+'%';
+}
+
+function selectAnswer(displayIdx){
+  if(answered[current])return;
+  userAnswers[current]=displayIdx;answered[current]=true;
+  const q=shuffledQs[current];const cd=shuffledOpts[current].indexOf(q.answer);
+  if(displayIdx===cd){correctCount++;if(q.part===1)part1Score+=1.5;else part2Score+=2;}
+  else wrongCount++;
+  updateStats();renderQuestion();
+  const bn=document.getElementById('btnNext');bn.disabled=false;
+  if(current===59){bn.textContent='查看結果 🏁';bn.onclick=showResult;}
+}
+
+function nextQ(){if(current<59){current++;renderQuestion();}}
+function prevQ(){if(current>0){current--;renderQuestion();}}
+
+function updateStats(){
+  document.getElementById('statRemain').textContent=60-answered.filter(Boolean).length;
+  document.getElementById('statCorrect').textContent=correctCount;
+  document.getElementById('statWrong').textContent=wrongCount;
+  document.getElementById('statScore').textContent=(part1Score+part2Score).toFixed(1);
+}
+
+function showResult(){
+  document.getElementById('quizScreen').style.display='none';
+  const rs=document.getElementById('resultScreen');rs.classList.add('show');
+  const score=part1Score+part2Score;const pass=score>=60;
+  const circle=document.getElementById('resultCircle');
+  circle.className='result-circle '+(pass?'pass':'fail');
+  circle.innerHTML=`<span>${score.toFixed(1)}</span><span style="font-size:0.9rem;font-weight:400">分</span>`;
+  document.getElementById('resultTitle').textContent=pass?'🎉 恭喜通過測驗！':'📚 繼續加油！';
+  document.getElementById('resultSub').textContent=pass?'成績達及格標準（60分）':'未達及格標準（60分），建議再複習一遍';
+  document.getElementById('rCorrect').textContent=correctCount;
+  document.getElementById('rWrong').textContent=wrongCount;
+  document.getElementById('rPart1').textContent=part1Score.toFixed(1)+' / 60';
+  document.getElementById('rPart2').textContent=part2Score.toFixed(1)+' / 40';
+}
+
+function restartQuiz(){
+  document.getElementById('resultScreen').classList.remove('show');
+  document.getElementById('startScreen').style.display='block';
+  document.getElementById('progressWrap').style.display='none';
+  document.getElementById('statsRow').style.display='none';
+}
+</script>
+</body>
+</html>
